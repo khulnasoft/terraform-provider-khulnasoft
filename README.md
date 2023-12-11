@@ -2,7 +2,7 @@
     <img src="Terraform_PrimaryLogo_Color_RGB.png" alt="Terraform logo" title="Terraform" height="100" />
 </a>
 <a href="https://www.khulnasoft.com/">
-    <img src="https://avatars3.githubusercontent.com/u/12783832?s=200&v=4" alt="Khulnasoft logo" title="Khulnasoft" height="100" />
+    <img src="https://avatars3.githubusercontent.com/u/43526139?s=200&v=4" alt="Khulnasoft logo" title="Khulnasoft" height="100" />
 </a>
 
 Khulnasoft Provider for Terraform
