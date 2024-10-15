@@ -5,6 +5,7 @@ const (
 	SaasEu1Url            = "https://eu-1.cloud.khulnasoft.com"
 	SaasAsia1Url          = "https://asia-1.cloud.khulnasoft.com"
 	SaasAsia2Url          = "https://asia-2.cloud.khulnasoft.com"
+	SaaSAu2Url            = "https://ap-2.cloud.khulnasoft.com"
 	SaasDevUrl            = "https://cloud-dev.khulnasoft.com"
 	SaasDevTokenUrl       = "https://stage.api.cloudsploit.com"
 	SaasDevProvUrl        = "https://prov-dev.cloud.khulnasoft.com"
