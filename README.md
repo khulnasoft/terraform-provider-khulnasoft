@@ -2,7 +2,7 @@
     <img src="Terraform_PrimaryLogo_Color_RGB.png" alt="Terraform logo" title="Terraform" height="100" />
 </a>
 <a href="https://www.khulnasoft.com/">
-    <img src="https://avatars3.githubusercontent.com/u/12783832?s=200&v=4" alt="Khulnasoft logo" title="Khulnasoft" height="100" />
+    <img src="https://avatars3.githubusercontent.com/u/43526139?s=200&v=4" alt="Khulnasoft logo" title="Khulnasoft" height="100" />
 </a>
 
 Khulnasoft Provider for Terraform
@@ -32,7 +32,7 @@ The provider lets you declaratively define the configuration for your Khulnasoft
 ## Requirements
 
 -	[Terraform](https://www.terraform.io/downloads.html) v0.12.x or higher
--	[Go](https://golang.org/doc/install) v1.18.x (to build the provider plugin)
+-	[Go](https://golang.org/doc/install) v1.16.x (to build the provider plugin)
 - [Khulnasoft Enterprise Platform](https://www.khulnasoft.com/khulnasoft-cloud-native-security-platform/)
 
 ## Using the Khulnasoft provider
@@ -43,7 +43,7 @@ To quickly get started using the Khulnasoft provider for Terraform, configure th
 terraform {
   required_providers {
     khulnasoft = {
-      version = "0.8.30"
+      version = "0.8.26"
       source  = "khulnasoft/khulnasoft"
     }
   }
