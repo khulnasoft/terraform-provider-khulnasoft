@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     khulnasoft = {
-      //      version = "0.8.31"
+      //      version = "0.8.30"
       source = "khulnasoft/khulnasoft"
     }
   }
