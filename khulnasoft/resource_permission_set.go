@@ -67,6 +67,7 @@ func resourcePermissionSet() *schema.Resource {
 	}
 }
 
+
 func resourcePermissionSetCreate(d *schema.ResourceData, m interface{}) error {
 	ac := m.(*client.Client)
 	name := d.Get("name").(string)
