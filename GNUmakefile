@@ -6,7 +6,7 @@ HOSTNAME	 := github.com
 NAMESPACE	 := khulnasoft
 NAME 		 := khulnasoft
 BINARY		 := terraform-provider-${NAME}
-VERSION      := 0.8.30
+VERSION      := 0.8.36
 OS_ARCH      := $(shell go env GOOS)_$(shell go env GOARCH)
 
 default: build
@@ -14,7 +14,7 @@ default: build
 build:
 	go get
 	go mod vendor
-	go build -ldflags "-X main.version=v${VERSION}" -o ${BINARY}
+	go build -ldflags "-X main.version=v${VERSION} -X github.com/khulnasoft/terraform-provider-khulnasoft/client.version=v${VERSION}" -o ${BINARY}
 
 install: build
 	mkdir -p ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
