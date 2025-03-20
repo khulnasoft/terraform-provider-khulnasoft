@@ -9,23 +9,56 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestKhulnasoftApplicationScope(t *testing.T) {
+func TestAquasecApplicationScope(t *testing.T) {
 	t.Parallel()
 	name := acctest.RandomWithPrefix("terraform-test")
 	description := "Created using Terraform"
+
+	resourceName := "khulnasoft_application_scope.terraformap"
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: CheckDestroy("khulnasoft_application_scope.terraformap"),
+		CheckDestroy: CheckDestroy(resourceName),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckApplicationScope(name, description),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckApplicationScopeExists("khulnasoft_application_scope.terraformap"),
+					testAccCheckApplicationScopeExists(resourceName),
+					// Verify all the attributes
+					resource.TestCheckResourceAttr(resourceName, "name", name),
+					resource.TestCheckResourceAttr(resourceName, "description", description),
+					// Verify artifacts category
+					resource.TestCheckResourceAttr(resourceName, "categories.0.artifacts.0.image.0.expression", "v1 && v2 && v3"),
+					resource.TestCheckResourceAttr(resourceName, "categories.0.artifacts.0.image.0.variables.0.attribute", "aqua.registry"),
+					resource.TestCheckResourceAttr(resourceName, "categories.0.artifacts.0.image.0.variables.0.value", "test"),
+					resource.TestCheckResourceAttr(resourceName, "categories.0.artifacts.0.image.0.variables.1.attribute", "image.repo"),
+					resource.TestCheckResourceAttr(resourceName, "categories.0.artifacts.0.image.0.variables.1.value", "test123"),
+					resource.TestCheckResourceAttr(resourceName, "categories.0.artifacts.0.image.0.variables.2.attribute", "image.label"),
+					resource.TestCheckResourceAttr(resourceName, "categories.0.artifacts.0.image.0.variables.2.name", "test.label"),
+					resource.TestCheckResourceAttr(resourceName, "categories.0.artifacts.0.image.0.variables.2.value", "test.value.123"),
+					// Verify workloads category
+					resource.TestCheckResourceAttr(resourceName, "categories.0.workloads.0.kubernetes.0.expression", "v1 && v2"),
+					resource.TestCheckResourceAttr(resourceName, "categories.0.workloads.0.kubernetes.0.variables.0.attribute", "kubernetes.cluster"),
+					resource.TestCheckResourceAttr(resourceName, "categories.0.workloads.0.kubernetes.0.variables.0.value", "test"),
+					resource.TestCheckResourceAttr(resourceName, "categories.0.workloads.0.kubernetes.0.variables.1.attribute", "kubernetes.namespace"),
+					resource.TestCheckResourceAttr(resourceName, "categories.0.workloads.0.kubernetes.0.variables.1.value", "test123"),
+					// Verify infrastructure category
+					resource.TestCheckResourceAttr(resourceName, "categories.0.infrastructure.0.kubernetes.0.expression", "v1"),
+					resource.TestCheckResourceAttr(resourceName, "categories.0.infrastructure.0.kubernetes.0.variables.0.attribute", "kubernetes.cluster"),
+					resource.TestCheckResourceAttr(resourceName, "categories.0.infrastructure.0.kubernetes.0.variables.0.value", "lion"),
+					// Verify basic attributes
+                    resource.TestCheckResourceAttr(resourceName, "name", name),
+                    resource.TestCheckResourceAttr(resourceName, "description", description),
+                    // Verify existing artifacts
+                    resource.TestCheckResourceAttr(resourceName, "categories.0.artifacts.0.image.0.expression", "v1 && v2 && v3"),
+                    // Add codebuild verification
+                    resource.TestCheckResourceAttr(resourceName, "categories.0.artifacts.0.codebuild.0.expression", "v1"),
+                    resource.TestCheckResourceAttr(resourceName, "categories.0.artifacts.0.codebuild.0.variables.0.attribute", "aqua.topic"),
+                    resource.TestCheckResourceAttr(resourceName, "categories.0.artifacts.0.codebuild.0.variables.0.value", "topic1"),
 				),
 			},
 			{
-				ResourceName:      "khulnasoft_application_scope.terraformap",
+				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -43,7 +76,7 @@ func testAccCheckApplicationScope(name string, description string) string {
 				image {
 					expression = "v1 && v2 && v3"
 					variables {
-						attribute = "khulnasoft.registry"
+						attribute = "aqua.registry"
 						value = "test"
 					}
 					variables {
@@ -56,6 +89,13 @@ func testAccCheckApplicationScope(name string, description string) string {
 						value = "test.value.123"
 					}
 				}
+				codebuild {
+                    expression = "v1"
+                    variables {
+                        attribute = "aqua.topic"
+                        value = "topic1"
+                    }
+                }
 			}
 			workloads {
 				kubernetes {
