@@ -9,7 +9,7 @@ resource "khulnasoft_application_scope" "terraformiap" {
       image {
         expression = "v1 && v2"
         variables {
-          attribute = "aqua.registry"
+          attribute = "khulnasoft.registry"
           value     = "test-registry"
         }
         variables {
@@ -20,7 +20,7 @@ resource "khulnasoft_application_scope" "terraformiap" {
       codebuild {
         expression = "v1"
         variables {
-          attribute = "aqua.topic"
+          attribute = "khulnasoft.topic"
           value     = "topic1"
         }
       }
@@ -32,11 +32,11 @@ resource "khulnasoft_application_scope" "terraformiap" {
         expression = "v1 && v2"
         variables {
           attribute = "kubernetes.cluster"
-          value     = "aqua"
+          value     = "khulnasoft"
         }
         variables {
           attribute = "kubernetes.namespace"
-          value     = "aqua"
+          value     = "khulnasoft"
         }
       }
     }
@@ -47,7 +47,7 @@ resource "khulnasoft_application_scope" "terraformiap" {
         expression = "v1"
         variables {
           attribute = "kubernetes.cluster"
-          value     = "aqua"
+          value     = "khulnasoft"
         }
       }
     }
