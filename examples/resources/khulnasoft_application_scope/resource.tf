@@ -3,18 +3,25 @@ resource "khulnasoft_application_scope" "terraformiap" {
   name        = "test18"
   // Categories is a nested block of artifacts, workloads and infrastructure
   categories {
-    // Artifacts is a nested block of Image, Function, CF
+    // Artifacts is a nested block of Image, Function, CF, and CodeBuild
     artifacts {
       // Every object requires expression(logical combinations of variables v1, v2, v3...) and list of variables consists of attribute(pre-defined) and value
       image {
         expression = "v1 && v2"
         variables {
-          attribute = "khulnasoft.registry"
+          attribute = "aqua.registry"
           value     = "test-registry"
         }
         variables {
           attribute = "image.repo"
           value     = "nginx"
+        }
+      }
+      codebuild {
+        expression = "v1"
+        variables {
+          attribute = "aqua.topic"
+          value     = "topic1"
         }
       }
     }
@@ -25,11 +32,11 @@ resource "khulnasoft_application_scope" "terraformiap" {
         expression = "v1 && v2"
         variables {
           attribute = "kubernetes.cluster"
-          value     = "khulnasoft"
+          value     = "aqua"
         }
         variables {
           attribute = "kubernetes.namespace"
-          value     = "khulnasoft"
+          value     = "aqua"
         }
       }
     }
@@ -40,7 +47,7 @@ resource "khulnasoft_application_scope" "terraformiap" {
         expression = "v1"
         variables {
           attribute = "kubernetes.cluster"
-          value     = "khulnasoft"
+          value     = "aqua"
         }
       }
     }
