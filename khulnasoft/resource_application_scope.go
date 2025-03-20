@@ -56,7 +56,7 @@ func resourceApplicationScope() *schema.Resource {
 									"image": {
 										Type:        schema.TypeSet,
 										Optional:    true,
-										Description: "Name of a registry as defined in Aqua",
+										Description: "Name of a registry as defined in Khulnasoft",
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"expression": {

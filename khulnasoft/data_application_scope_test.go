@@ -57,7 +57,7 @@ func TestDataApplicationScopeWithCodeBuild(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"data.khulnasoft_application_scope.test_codebuild_ds",
 						"categories.0.artifacts.0.codebuild.0.variables.0.attribute",
-						"aqua.topic",
+						"khulnasoft.topic",
 					),
 					resource.TestCheckResourceAttr(
 						"data.khulnasoft_application_scope.test_codebuild_ds",
@@ -89,7 +89,7 @@ func testAccCheckApplicationScopeWithCodeBuild() string {
 				codebuild {
 					expression = "v1"
 					variables {
-						attribute = "aqua.topic"
+						attribute = "khulnasoft.topic"
 						value     = "topic1"
 					}
 				}
@@ -109,7 +109,7 @@ func testAccCheckApplicationScopeWithCodeBuildDataSource() string {
 				codebuild {
 					expression = "v1"
 					variables {
-						attribute = "aqua.topic"
+						attribute = "khulnasoft.topic"
 						value     = "topic1"
 					}
 				}

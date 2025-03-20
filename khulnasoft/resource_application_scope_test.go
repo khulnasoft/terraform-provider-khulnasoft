@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAquasecApplicationScope(t *testing.T) {
+func TestKhulnasoftApplicationScope(t *testing.T) {
 	t.Parallel()
 	name := acctest.RandomWithPrefix("terraform-test")
 	description := "Created using Terraform"
@@ -29,7 +29,7 @@ func TestAquasecApplicationScope(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "description", description),
 					// Verify artifacts category
 					resource.TestCheckResourceAttr(resourceName, "categories.0.artifacts.0.image.0.expression", "v1 && v2 && v3"),
-					resource.TestCheckResourceAttr(resourceName, "categories.0.artifacts.0.image.0.variables.0.attribute", "aqua.registry"),
+					resource.TestCheckResourceAttr(resourceName, "categories.0.artifacts.0.image.0.variables.0.attribute", "khulnasoft.registry"),
 					resource.TestCheckResourceAttr(resourceName, "categories.0.artifacts.0.image.0.variables.0.value", "test"),
 					resource.TestCheckResourceAttr(resourceName, "categories.0.artifacts.0.image.0.variables.1.attribute", "image.repo"),
 					resource.TestCheckResourceAttr(resourceName, "categories.0.artifacts.0.image.0.variables.1.value", "test123"),
@@ -53,7 +53,7 @@ func TestAquasecApplicationScope(t *testing.T) {
                     resource.TestCheckResourceAttr(resourceName, "categories.0.artifacts.0.image.0.expression", "v1 && v2 && v3"),
                     // Add codebuild verification
                     resource.TestCheckResourceAttr(resourceName, "categories.0.artifacts.0.codebuild.0.expression", "v1"),
-                    resource.TestCheckResourceAttr(resourceName, "categories.0.artifacts.0.codebuild.0.variables.0.attribute", "aqua.topic"),
+                    resource.TestCheckResourceAttr(resourceName, "categories.0.artifacts.0.codebuild.0.variables.0.attribute", "khulnasoft.topic"),
                     resource.TestCheckResourceAttr(resourceName, "categories.0.artifacts.0.codebuild.0.variables.0.value", "topic1"),
 				),
 			},
@@ -76,7 +76,7 @@ func testAccCheckApplicationScope(name string, description string) string {
 				image {
 					expression = "v1 && v2 && v3"
 					variables {
-						attribute = "aqua.registry"
+						attribute = "khulnasoft.registry"
 						value = "test"
 					}
 					variables {
@@ -92,7 +92,7 @@ func testAccCheckApplicationScope(name string, description string) string {
 				codebuild {
                     expression = "v1"
                     variables {
-                        attribute = "aqua.topic"
+                        attribute = "khulnasoft.topic"
                         value = "topic1"
                     }
                 }
