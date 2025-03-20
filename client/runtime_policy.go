@@ -308,7 +308,22 @@ func (cli *Client) CreateRuntimePolicy(runtimePolicy *RuntimePolicy) error {
 	if err != nil {
 		return err
 	}
-	log.Println(string(payload))
+	// Create a copy of the payload with sensitive information removed
+	var sanitizedPayload map[string]interface{}
+	if err := json.Unmarshal(payload, &sanitizedPayload); err != nil {
+		log.Printf("Error unmarshaling payload for sanitization: %v", err)
+	} else {
+		if tripwireMap, ok := sanitizedPayload["tripwire"].(map[string]interface{}); ok {
+			tripwireMap["user_password"] = "REDACTED"
+			sanitizedPayload["tripwire"] = tripwireMap
+		}
+		sanitizedPayloadBytes, err := json.Marshal(sanitizedPayload)
+		if err != nil {
+			log.Printf("Error marshaling sanitized payload: %v", err)
+		} else {
+			log.Println(string(sanitizedPayloadBytes))
+		}
+	}
 	resp, body, errs := request.Clone().Set("Authorization", "Bearer "+cli.token).Post(cli.url + apiPath).Send(string(payload)).End()
 	if errs != nil {
 		return errors.Wrap(getMergedError(errs), "failed creating runtime policy.")
