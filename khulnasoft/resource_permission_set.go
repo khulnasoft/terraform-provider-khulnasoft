@@ -28,6 +28,7 @@ func resourcePermissionSet() *schema.Resource {
 				Description: "The name of the Permission Set, comprised of alphanumeric characters and '-', '_', ' ', ':', '.', '@', '!', '^'.",
 				Required:    true,
 				ForceNew:    true,
+				ValidateFunc: validateSaasResourceWarning("khulnasoft_permissions_sets", "khulnasoft_permission_set_saas"),
 			},
 			"description": {
 				Type:        schema.TypeString,
