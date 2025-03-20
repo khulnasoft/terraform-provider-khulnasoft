@@ -32,7 +32,7 @@ git clone https://github.com/khulnasoft/terraform-provider-khulnasoft.git
 
 cd terraform-provider-khulnasoft
 
-git checkout v0.8.20
+git checkout v0.8.30
 ```
 
 **Build and install the provider**

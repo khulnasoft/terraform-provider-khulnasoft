@@ -2,9 +2,10 @@ package khulnasoft
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/khulnasoft/terraform-provider-khulnasoft/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"strings"
 )
 
 func resourceApplicationScope() *schema.Resource {
@@ -18,10 +19,11 @@ func resourceApplicationScope() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:        schema.TypeString,
-				Description: "Name of an application scope.",
-				Required:    true,
-				ForceNew:    true,
+				Type:         schema.TypeString,
+				Description:  "Name of an application scope.",
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validateSaasResourceWarning("khulnasoft_application_scope", "khulnasoft_application_scope_saas"),
 			},
 			"description": {
 				Type:        schema.TypeString,
@@ -120,6 +122,39 @@ func resourceApplicationScope() *schema.Resource {
 									"cf": {
 										Type:     schema.TypeSet,
 										Optional: true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"expression": {
+													Type:     schema.TypeString,
+													Optional: true,
+												},
+												"variables": {
+													Type:     schema.TypeList,
+													Optional: true,
+													Elem: &schema.Resource{
+														Schema: map[string]*schema.Schema{
+															"attribute": {
+																Type:     schema.TypeString,
+																Optional: true,
+															},
+															"value": {
+																Type:     schema.TypeString,
+																Optional: true,
+															},
+															"name": {
+																Type:     schema.TypeString,
+																Optional: true,
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+									"codebuild": {
+										Type:        schema.TypeSet,
+										Optional:    true,
+										Description: "AWS CodeBuild configuration",
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"expression": {
@@ -388,7 +423,6 @@ func resourceApplicationScopeCreate(d *schema.ResourceData, m interface{}) error
 }
 
 func expandApplicationScope(d *schema.ResourceData) (*client.ApplicationScope, error) {
-
 	var err error
 	iap := client.ApplicationScope{
 		Name: d.Get("name").(string),
@@ -423,7 +457,6 @@ func expandApplicationScope(d *schema.ResourceData) (*client.ApplicationScope, e
 
 		if len(categories["workloads"].(*schema.Set).List()) > 0 {
 			workloads = categories["workloads"].(*schema.Set).List()[0].(map[string]interface{})
-
 		}
 		if len(categories["infrastructure"].(*schema.Set).List()) > 0 {
 			infrastructure = categories["infrastructure"].(*schema.Set).List()[0].(map[string]interface{})
@@ -435,7 +468,6 @@ func expandApplicationScope(d *schema.ResourceData) (*client.ApplicationScope, e
 	}
 
 	return &iap, err
-
 }
 
 func resourceApplicationScopeRead(d *schema.ResourceData, m interface{}) error {
@@ -494,17 +526,16 @@ func resourceApplicationScopeUpdate(d *schema.ResourceData, m interface{}) error
 			return err
 		}
 		return resourceApplicationScopeRead(d, m)
-
 	}
 	return nil
 }
 
 func createCategory(a map[string]interface{}, w map[string]interface{}, i map[string]interface{}) client.Category {
-
 	//creating Artifacts
 	var image client.CommonStruct
 	var function client.CommonStruct
 	var cf client.CommonStruct
+	var codebuild client.CommonStruct
 
 	//creating Workloads
 	var wkubernetes client.CommonStruct
@@ -521,6 +552,14 @@ func createCategory(a map[string]interface{}, w map[string]interface{}, i map[st
 		} else {
 			image = createEmptyCommonStruct()
 		}
+		
+		if codebuildSet, ok := a["codebuild"].(*schema.Set); ok && codebuildSet != nil && len(codebuildSet.List()) > 0 {
+            codebuild = createCommonStruct(codebuildSet.List()[0].(map[string]interface{}))
+        } else {
+            codebuild = createEmptyCommonStruct()
+        }
+
+
 		if len(a["function"].(*schema.Set).List()) != 0 {
 			function = createCommonStruct(a["function"].(*schema.Set).List()[0].(map[string]interface{}))
 		} else {
@@ -566,9 +605,10 @@ func createCategory(a map[string]interface{}, w map[string]interface{}, i map[st
 
 	return client.Category{
 		Artifacts: client.Artifact{
-			Image:    image,
-			Function: function,
-			CF:       cf,
+			Image:     image,
+			Function:  function,
+			CF:        cf,
+			CodeBuild: codebuild,
 		},
 		Workloads: client.Workload{
 			Kubernetes: wkubernetes,
@@ -580,7 +620,6 @@ func createCategory(a map[string]interface{}, w map[string]interface{}, i map[st
 			IOS:         ios,
 		},
 	}
-
 }
 
 func createCommonStruct(m map[string]interface{}) client.CommonStruct {
@@ -626,7 +665,6 @@ func resourceApplicationScopeDelete(d *schema.ResourceData, m interface{}) error
 }
 
 func flattenCategories(category1 client.Category) []map[string]interface{} {
-
 	return []map[string]interface{}{
 		{
 			"artifacts":      flattenArtifacts(category1.Artifacts),
@@ -651,6 +689,11 @@ func flattenArtifacts(artifact1 client.Artifact) []map[string]interface{} {
 	if artifact1.CF.Expression != "" {
 		artifactsMap["cf"] = flattenAppScopeCommon(artifact1.CF)
 	}
+
+	if artifact1.CodeBuild.Expression != "" {
+		artifactsMap["codebuild"] = flattenAppScopeCommon(artifact1.CodeBuild)
+	}
+
 	if len(artifactsMap) == 0 {
 		return make([]map[string]interface{}, 0)
 	} else {
@@ -681,7 +724,6 @@ func flattenWorkloads(workload1 client.Workload) []map[string]interface{} {
 }
 
 func flattenInfrastructure(infra1 client.Infrastructure) []map[string]interface{} {
-
 	infraMap := map[string]interface{}{}
 
 	if infra1.IKubernetes.Expression != "" {

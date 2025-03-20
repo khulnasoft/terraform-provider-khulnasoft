@@ -92,6 +92,7 @@ func Provider(v string) *schema.Provider {
 			"khulnasoft_group":             resourceGroup(),
 			"khulnasoft_user_saas":         resourceUserSaas(),
 			"khulnasoft_role_mapping_saas": resourceRoleMappingSaas(),
+			"khulnasoft_permission_set_saas": resourcePermissionSetSaas(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"khulnasoft_users":                       dataSourceUsers(),
@@ -121,6 +122,7 @@ func Provider(v string) *schema.Provider {
 			"khulnasoft_groups":             dataSourceGroups(),
 			"khulnasoft_users_saas":         dataSourceUsersSaas(),
 			"khulnasoft_roles_mapping_saas": dataSourceRolesMappingSaas(),
+			"khulnasoft_permissions_sets_saas": dataSourcePermissionsSetsSaas(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}

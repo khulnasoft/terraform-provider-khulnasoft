@@ -5,17 +5,19 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
+	"log"
+	neturl "net/url"
+
 	"github.com/khulnasoft/terraform-provider-khulnasoft/consts"
 	"github.com/parnurzeal/gorequest"
 	"golang.org/x/net/http/httpproxy"
 	"golang.org/x/time/rate"
-	"log"
-	neturl "net/url"
 )
 
 // Client - API client
 type Client struct {
 	url        string
+	saasUrl    string
 	tokenUrl   string
 	user       string
 	password   string
@@ -29,6 +31,10 @@ type Client struct {
 const Csp string = "csp"
 const Saas = "saas"
 const SaasDev = "saasDev"
+
+const UserAgentBase = "terraform-provider-khulnasoft"
+
+var version string
 
 // NewClient - initialize and return the Client
 func NewClient(url, user, password string, verifyTLS bool, caCertByte []byte) *Client {
@@ -47,11 +53,13 @@ func NewClient(url, user, password string, verifyTLS bool, caCertByte []byte) *C
 		}
 	}
 
+	request := gorequest.New().TLSClientConfig(tlsConfig)
+
 	c := &Client{
 		url:       url,
 		user:      user,
 		password:  password,
-		gorequest: gorequest.New().TLSClientConfig(tlsConfig),
+		gorequest: request,
 		// we are setting rate limit for 10 connection per second
 		limiter: rate.NewLimiter(10, 3),
 	}
@@ -67,26 +75,32 @@ func NewClient(url, user, password string, verifyTLS bool, caCertByte []byte) *C
 	case consts.SaasUrl:
 		c.clientType = Saas
 		c.tokenUrl = consts.SaasTokenUrl
+		c.saasUrl = consts.SaasUrl
 		break
 	case consts.SaasEu1Url:
 		c.clientType = Saas
 		c.tokenUrl = consts.SaasEu1TokenUrl
+		c.saasUrl = consts.SaasEu1Url
 		break
 	case consts.SaasAsia1Url:
 		c.clientType = Saas
 		c.tokenUrl = consts.SaasAsia1TokenUrl
+		c.saasUrl = consts.SaasAsia1Url
 		break
 	case consts.SaasAsia2Url:
 		c.clientType = Saas
 		c.tokenUrl = consts.SaasAsia2TokenUrl
+		c.saasUrl = consts.SaasAsia2Url
 		break
 	case consts.SaaSAu2Url:
 		c.clientType = Saas
 		c.tokenUrl = consts.SaasAu2TokenUrl
+		c.saasUrl = consts.SaaSAu2Url
 		break
 	case consts.SaasDevUrl:
 		c.clientType = SaasDev
 		c.tokenUrl = consts.SaasDevTokenUrl
+		c.saasUrl = consts.SaasDevUrl
 		break
 	default:
 		c.clientType = Csp
@@ -121,7 +135,7 @@ func (cli *Client) GetAuthToken() (string, string, error) {
 
 // GetAuthToken - Connect to Khulnasoft and return a JWT bearerToken (string)
 func (cli *Client) GetCspAuthToken() (string, error) {
-	resp, body, errs := cli.gorequest.Post(cli.url + "/api/v1/login").
+	resp, body, errs := cli.makeRequest().Post(cli.url + "/api/v1/login").
 		Send(`{"id":"` + cli.user + `", "password":"` + cli.password + `"}`).End()
 	if errs != nil {
 		return "", getMergedError(errs)
@@ -164,7 +178,7 @@ func (cli *Client) GetUSEAuthToken() (string, string, error) {
 		return "", "", fmt.Errorf(fmt.Sprintf("%v URL is not allowed USE url", cli.url))
 	}
 
-	resp, body, errs := cli.gorequest.Post(cli.tokenUrl + "/v2/signin").
+	resp, body, errs := cli.makeRequest().Post(cli.tokenUrl + "/v2/signin").
 		Send(`{"email":"` + cli.user + `", "password":"` + cli.password + `"}`).End()
 	if errs != nil {
 		return "", "", getMergedError(errs)
@@ -177,11 +191,16 @@ func (cli *Client) GetUSEAuthToken() (string, string, error) {
 		cli.token = data["token"].(string)
 		//get the ese_url to make the API requests.
 		request := cli.gorequest
+		if request == nil {
+			return "", "", fmt.Errorf("request is uninitialized")
+		}
+
 		request.Set("Authorization", "Bearer "+cli.token)
 		events, body, errs := request.Clone().Get(provUrl + "/v1/envs").End()
-
-		if errs != nil {
-			log.Println(events.StatusCode)
+		if errs != nil || events == nil {
+			if events != nil {
+				log.Println(events.StatusCode)
+			}
 			err := fmt.Errorf("error calling %s", provUrl)
 			return "", "", err
 		}
@@ -197,4 +216,9 @@ func (cli *Client) GetUSEAuthToken() (string, string, error) {
 	}
 
 	return "", "", fmt.Errorf("request failed. status: %s, response: %s", resp.Status, body)
+}
+
+func (cli *Client) makeRequest() *gorequest.SuperAgent {
+	userAgent := fmt.Sprintf("%s/%s", UserAgentBase, version)
+	return cli.gorequest.Clone().Set("User-Agent", userAgent)
 }
