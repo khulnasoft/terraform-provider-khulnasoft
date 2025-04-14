@@ -8,7 +8,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/parnurzeal/gorequest v0.2.16
 	github.com/pkg/errors v0.9.1
-	golang.org/x/net v0.23.0
+	golang.org/x/net v0.36.0
 	golang.org/x/time v0.0.0-20220722155302-e5dcc9cfc0b9
 )
 
@@ -22,7 +22,7 @@ require (
 	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/bgentry/speakeasy v0.1.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/elazarl/goproxy v0.0.0-20210110162100-a92cc753f88e // indirect
+	github.com/elazarl/goproxy v1.2.1 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
@@ -66,9 +66,9 @@ require (
 	github.com/vmihailenco/msgpack/v4 v4.3.12 // indirect
 	github.com/vmihailenco/tagparser v0.1.1 // indirect
 	github.com/zclconf/go-cty v1.10.0 // indirect
-	golang.org/x/crypto v0.21.0 // indirect
-	golang.org/x/sys v0.18.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/crypto v0.35.0 // indirect
+	golang.org/x/sys v0.30.0 // indirect
+	golang.org/x/text v0.22.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230525234030-28d5490b6b19 // indirect
 	google.golang.org/grpc v1.56.3 // indirect
