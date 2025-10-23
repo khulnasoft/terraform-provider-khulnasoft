@@ -3,12 +3,12 @@
 page_title: "khulnasoft_acknowledges Data Source - terraform-provider-khulnasoft"
 subcategory: ""
 description: |-
-  The data source khulnasoft_acknowledges provides a method to query all acknowledges within the Aqua
+  The data source khulnasoft_acknowledges provides a method to query all acknowledges within the Khulnasoft
 ---
 
 # khulnasoft_acknowledges (Data Source)
 
-The data source `khulnasoft_acknowledges` provides a method to query all acknowledges within the Aqua
+The data source `khulnasoft_acknowledges` provides a method to query all acknowledges within the Khulnasoft
 
 ## Example Usage
 

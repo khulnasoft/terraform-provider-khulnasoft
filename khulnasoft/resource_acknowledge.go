@@ -74,7 +74,7 @@ func resourceAcknowledge() *schema.Resource {
 						},
 						"resource_cpe": {
 							Type:        schema.TypeString,
-							Description: "The CPE of the resource as listed in the issue by the Aqua API. This is required for resources of type 'executable'. For packages and files, the next parameters can be specified instead.",
+							Description: "The CPE of the resource as listed in the issue by the Khulnasoft API. This is required for resources of type 'executable'. For packages and files, the next parameters can be specified instead.",
 							Optional:    true,
 						},
 						"resource_path": {

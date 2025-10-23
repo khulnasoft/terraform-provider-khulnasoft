@@ -13,7 +13,7 @@ import (
 
 func dataSourceAcknowledges() *schema.Resource {
 	return &schema.Resource{
-		Description: "The data source `khulnasoft_acknowledges` provides a method to query all acknowledges within the Aqua ",
+		Description: "The data source `khulnasoft_acknowledges` provides a method to query all acknowledges within the Khulnasoft ",
 		ReadContext: dataAcknowledgesRead,
 		Schema: map[string]*schema.Schema{
 			"acknowledges": {
@@ -59,7 +59,7 @@ func dataSourceAcknowledges() *schema.Resource {
 						},
 						"resource_cpe": {
 							Type:        schema.TypeString,
-							Description: "The CPE of the resource as listed in the issue by the Aqua API. This is required for resources of type 'executable'. For packages and files, the next parameters can be specified instead.",
+							Description: "The CPE of the resource as listed in the issue by the Khulnasoft API. This is required for resources of type 'executable'. For packages and files, the next parameters can be specified instead.",
 							Computed:    true,
 						},
 						"resource_path": {

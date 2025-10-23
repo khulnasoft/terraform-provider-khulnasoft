@@ -34,49 +34,49 @@ description: |-
 - `allowed_registries` (Set of String) List of registry names to allow on the hosts.
 - `antivirus_protection` (Boolean) This setting is available only when you have license for `Advanced Malware Protection`. Send true to make use of the license and enable the `Real-time Malware Protection` control in the Host Runtime policies.
 - `audit_all` (Boolean) Agent will send extra audit messages to the server for success operations from inside the container (runtime).
-- `auto_copy_secrets` (Boolean) This option is applicable only if `Enable Pod Enforcer injection` is selected. Select this option if you want Aqua Enterprise to copy the secrets defined above to the Pod Enforcer namespace and container. Otherwise, you can choose to copy these secrets by other means.
-- `auto_discover_configure_registries` (Boolean) This option is available only if `Enable workload discovery` is selected. If selected, the KubeEnforcer will add previously unknown image registries from the cluster to Aqua.
+- `auto_copy_secrets` (Boolean) This option is applicable only if `Enable Pod Enforcer injection` is selected. Select this option if you want Khulnasoft Enterprise to copy the secrets defined above to the Pod Enforcer namespace and container. Otherwise, you can choose to copy these secrets by other means.
+- `auto_discover_configure_registries` (Boolean) This option is available only if `Enable workload discovery` is selected. If selected, the KubeEnforcer will add previously unknown image registries from the cluster to Khulnasoft.
 - `auto_discovery_enabled` (Boolean) When this option is selected, the KubeEnforcer will discover workloads on its cluster.
 - `auto_scan_discovered_images_running_containers` (Boolean) This option is available only if `Enable workload discovery` is selected. If selected, the KubeEnforcer will automatically register images running as workloads (and scan the discovered images for security issues).
 - `behavioral_engine` (Boolean) Select Enabled to detect suspicious activity in your containers and display potential security threats in the Incidents and Audit pages.
 - `block_admission_control` (Boolean) This applies only if both `Enable admission control` and Enforce mode are set. This additional option must be selected for admission control to work if the KubeEnforcer is not connected to any Gateway. If this option is not selected, admission control will be disabled; this will have no effect on containers already running.
 - `container_activity_protection` (Boolean) Set `True` to apply Container Runtime Policies, Image Profiles, and Firewall Policies to containers.
 - `container_antivirus_protection` (Boolean) This setting is available only when you have license for `Advanced Malware Protection`. Send true to make use of the license and enable the `Real-time Malware Protection` control in the Container Runtime policies.
-- `description` (String) A description of the Aqua Enforcer group.
+- `description` (String) A description of the Khulnasoft Enforcer group.
 - `enforce` (Boolean) Whether to enable enforce mode on the Enforcers, defaults to False.
-- `forensics` (Boolean) Select Enabled to send activity logs in your containers to the Aqua Server for forensics purposes.
-- `gateways` (List of String) List of Aqua gateway IDs for the Enforcers.
+- `forensics` (Boolean) Select Enabled to send activity logs in your containers to the Khulnasoft Server for forensics purposes.
+- `gateways` (List of String) List of Khulnasoft gateway IDs for the Enforcers.
 - `host_assurance` (Boolean) Set `True` to enable host scanning and respective Host Assurance controls.
 - `host_behavioral_engine` (Boolean) Set `True` to enable these Host Runtime Policy controls: `OS Users and Groups Allowed` and `OS Users and Groups Blocked`
-- `host_forensics_collection` (Boolean) Select Enabled to send activity logs in your host to the Aqua Server for forensics purposes.
-- `host_network_protection` (Boolean) Set `True` to apply Firewall Policies to hosts, and allow recording network maps for Aqua services. The Network Firewall setting must be disabled when deploying the Aqua Enforcer on a machine running Rocky Linux. See https://docs.khulnasoft.com/docs/platform-support-limitations-rocky-linux for further information
+- `host_forensics_collection` (Boolean) Select Enabled to send activity logs in your host to the Khulnasoft Server for forensics purposes.
+- `host_network_protection` (Boolean) Set `True` to apply Firewall Policies to hosts, and allow recording network maps for Khulnasoft services. The Network Firewall setting must be disabled when deploying the Khulnasoft Enforcer on a machine running Rocky Linux. See https://docs.khulnasoft.com/docs/platform-support-limitations-rocky-linux for further information
 - `host_os` (String) The OS type for the host
 - `host_protection` (Boolean) Set `True` to enable all Host Runtime Policy controls except for `OS Users and Groups Allowed` and `OS Users and Groups Blocked`.
 - `host_user_protection` (Boolean) Set `True` to enable these Host Runtime Policy controls: `OS Users and Groups Allowed` and `OS Users and Groups Blocked`
 - `image_assurance` (Boolean) Set `True` to enable selected controls: Container Runtime Policy (`Block Non-Compliant Images`, `Block Unregistered Images`, and `Registries Allowed`) and Default Image Assurance Policy (`Images Blocked`).
-- `kube_bench_image_name` (String) See https://docs.khulnasoft.com/docs/securing-kubernetes-applications#section-configuration-hardening, The KubeEnforcer can deploy the Aqua Security kube-bench open-source product to perform Kubernetes CIS benchmark testing of nodes.
+- `kube_bench_image_name` (String) See https://docs.khulnasoft.com/docs/securing-kubernetes-applications#section-configuration-hardening, The KubeEnforcer can deploy the Khulnasoft Security kube-bench open-source product to perform Kubernetes CIS benchmark testing of nodes.
 				This field specifies the path and file name of the kube-bench product image for the KubeEnforcer to deploy; it will be filled in automatically. You can optionally enter a different value.
 - `logical_name` (String) Name for the batch install record.
 - `micro_enforcer_certs_secrets_name` (String) This option is applicable only if `Enable Pod Enforcer injection` is selected.
 - `micro_enforcer_image_name` (String) This option is applicable only if `Enable Pod Enforcer injection` is selected. This field specifies the path and file name of the KubeEnforcer product image to be deployed; it will be filled in automatically. You can optionally enter a different value.
 - `micro_enforcer_injection` (Boolean) This applies only if both `Enable admission control` and Enforce mode are set. This additional option must be selected for admission control to work if the KubeEnforcer is not connected to any Gateway. If this option is not selected, admission control will be disabled; this will have no effect on containers already running.
-- `micro_enforcer_secrets_name` (String) You can specify the name of the secret (in the Aqua namespace) that Aqua copies into the Pod Enforcer namespace and kube-bench, allowing them access to the Pod Enforcer and kube-bench product images, respectively.
-- `network_protection` (Boolean) Send true to apply Firewall Policies to containers, and allow recording network maps for Aqua services. The Network Firewall setting must be disabled when deploying the Aqua Enforcer on a machine running Rocky Linux. See https://docs.khulnasoft.com/docs/platform-support-limitations-rocky-linux for further information.
+- `micro_enforcer_secrets_name` (String) You can specify the name of the secret (in the Khulnasoft namespace) that Khulnasoft copies into the Pod Enforcer namespace and kube-bench, allowing them access to the Pod Enforcer and kube-bench product images, respectively.
+- `network_protection` (Boolean) Send true to apply Firewall Policies to containers, and allow recording network maps for Khulnasoft services. The Network Firewall setting must be disabled when deploying the Khulnasoft Enforcer on a machine running Rocky Linux. See https://docs.khulnasoft.com/docs/platform-support-limitations-rocky-linux for further information.
 - `permission` (String) Permission Action
 - `risk_explorer_auto_discovery` (Boolean) Set `True` to allow Enforcers to be discovered in the Risk Explorer.
 - `runtime_type` (String) The container runtime environment.
 - `schedule_scan_settings` (Block List, Max: 1) Scheduling scan time for which you are creating the Enforcer group. (see [below for nested schema](#nestedblock--schedule_scan_settings))
 - `sync_host_images` (Boolean) Set `True` to configure Enforcers to discover local host images. Discovered images will be listed under Images > Host Images, as well as under Infrastructure (in the Images tab for applicable hosts).
 - `syscall_enabled` (Boolean) Set `True` will allow profiling and monitoring system calls made by running containers.
-- `user_access_control` (Boolean) Set `True` to apply User Access Control Policies to containers. Note that Aqua Enforcers must be deployed with the AQUA_RUNC_INTERCEPTION environment variable set to 0 in order to use User Access Control Policies.
+- `user_access_control` (Boolean) Set `True` to apply User Access Control Policies to containers. Note that Khulnasoft Enforcers must be deployed with the KHULNASOFT_RUNC_INTERCEPTION environment variable set to 0 in order to use User Access Control Policies.
 
 ### Read-Only
 
-- `aqua_version` (String) Aqua server version
+- `khulnasoft_version` (String) Khulnasoft server version
 - `command` (List of Object) The installation command. (see [below for nested schema](#nestedatt--command))
 - `connected_count` (Number) Number of connected enforcers in the enforcer group.
 - `disconnected_count` (Number) Number of disconnected enforcers in the enforcer group.
-- `enforcer_image_name` (String) The specific Aqua Enforcer product image (with image tag) to be deployed.
+- `enforcer_image_name` (String) The specific Khulnasoft Enforcer product image (with image tag) to be deployed.
 - `gateway_address` (String) Gateway Address
 - `gateway_name` (String) Gateway Name
 - `high_vulns` (Number) Number of high vulnerabilities in the enforcers that in this enforcer group.

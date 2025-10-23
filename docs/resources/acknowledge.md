@@ -79,7 +79,7 @@ Optional:
 - `registry_name` (String) Only acknowledge the issue in the context of the specified repository (also requires 'registry_name').
 - `repository` (String) The name of the repository in whose context the issue was acknowledged (if not for all images)
 - `repository_name` (String) The name of the repository in whose context the issue was acknowledged (if not for all images)
-- `resource_cpe` (String) The CPE of the resource as listed in the issue by the Aqua API. This is required for resources of type 'executable'. For packages and files, the next parameters can be specified instead.
+- `resource_cpe` (String) The CPE of the resource as listed in the issue by the Khulnasoft API. This is required for resources of type 'executable'. For packages and files, the next parameters can be specified instead.
 - `resource_format` (String) The format of the resource.
 - `resource_hash` (String) When the resource_type is 'file', the hash of the file is required
 - `resource_name` (String) When the resource_type is 'package', the name of the package is required.

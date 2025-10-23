@@ -35,7 +35,7 @@ resource "khulnasoft_image" "example_khulnasoft_image" {
 
 - `allow_image` (Boolean) If this field is set to true, the image will be whitelisted.
 - `block_image` (Boolean) If this field is set to true, the image will be blacklisted.
-- `labels` (List of String) Aqua labels of the image.
+- `labels` (List of String) Khulnasoft labels of the image.
 - `permission_modification_comment` (String) A comment on why the image was whitelisted or blacklisted
 
 ### Read-Only
@@ -127,12 +127,12 @@ Read-Only:
 - `ack_scope` (String)
 - `acknowledge_date` (String)
 - `ancestor_pkg` (String)
-- `aqua_score` (Number)
-- `aqua_score_classification` (String)
-- `aqua_scoring_system` (String)
-- `aqua_severity` (String)
-- `aqua_severity_classification` (String)
-- `aqua_vectors` (String)
+- `khulnasoft_score` (Number)
+- `khulnasoft_score_classification` (String)
+- `khulnasoft_scoring_system` (String)
+- `khulnasoft_severity` (String)
+- `khulnasoft_severity_classification` (String)
+- `khulnasoft_vectors` (String)
 - `audit_events_count` (Number)
 - `block_events_count` (Number)
 - `classification` (String)
