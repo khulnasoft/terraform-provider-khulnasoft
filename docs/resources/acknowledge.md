@@ -14,32 +14,32 @@ description: |-
 
 ```terraform
 resource "khulnasoft_acknowledge" "acknowledge" {
-    comment = "comment"
-    issues {
-        docker_id = ""
-        image_name = "image:latest"
-        issue_name = "CVE-2022-1271"
-        issue_type = "vulnerability"
-        registry_name = "registry"
-        resource_cpe = "cpe:/a:gnu:gzip:1.10"
-        resource_name = "gzip"
-        resource_path = "/usr/bin/gzip"
-        resource_type = "executable"
-        resource_version = "1.10"
-    }
+  comment = "comment"
+  issues {
+    docker_id        = ""
+    image_name       = "image:latest"
+    issue_name       = "CVE-2022-1271"
+    issue_type       = "vulnerability"
+    registry_name    = "registry"
+    resource_cpe     = "cpe:/a:gnu:gzip:1.10"
+    resource_name    = "gzip"
+    resource_path    = "/usr/bin/gzip"
+    resource_type    = "executable"
+    resource_version = "1.10"
+  }
 
-    issues {
-        docker_id = "docker-id"
-        image_name = "image-name"
-        issue_name = "ALAS2-2021-1722"
-        issue_type = "vulnerability"
-        registry_name = "registry-name"
-        resource_cpe = "pkg:/amzn:2:nss-softokn:3.44.0-8.amzn2"
-        resource_name = "nss-softokn"
-        resource_path = ""
-        resource_type = "package"
-        resource_version = "3.44.0-8.amzn2"
-    }
+  issues {
+    docker_id        = "docker-id"
+    image_name       = "image-name"
+    issue_name       = "ALAS2-2021-1722"
+    issue_type       = "vulnerability"
+    registry_name    = "registry-name"
+    resource_cpe     = "pkg:/amzn:2:nss-softokn:3.44.0-8.amzn2"
+    resource_name    = "nss-softokn"
+    resource_path    = ""
+    resource_type    = "package"
+    resource_version = "3.44.0-8.amzn2"
+  }
 }
 ```
 
@@ -66,19 +66,28 @@ Required:
 
 Optional:
 
+- `ack_repo_id` (Number) Unique ID generated when a security issue on a resource is suppressed. It is used to remove the suppression after the expiration period.
 - `docker_id` (String)
 - `expiration_days` (Number) Number of days until expiration of the acknowledgement. The value must be integer from 1 to 999, inclusive.
 - `fix_version` (String) The version of the package that having a fix for the issue.
+- `has_custom_severity` (Boolean) Indicates whether custom severity is assigned to the suppressed vulnerability
+- `image` (String) The name of the image in whose context the issue was acknowledged (if not for all images)
 - `image_name` (String) Only acknowledge the issue in the context of the specified image (also requires 'registry_name')
 - `os` (String) When the resource_type is 'package', the operating system is required (e.g., 'ubuntu', 'alpine').
 - `os_version` (String) When the resource_type is 'package', the operating system version is required.
+- `registry` (String) If the issue was acknowledged in the context of a specific image or repository, the name of the registry where they are located
 - `registry_name` (String) Only acknowledge the issue in the context of the specified repository (also requires 'registry_name').
+- `repository` (String) The name of the repository in whose context the issue was acknowledged (if not for all images)
+- `repository_name` (String) The name of the repository in whose context the issue was acknowledged (if not for all images)
 - `resource_cpe` (String) The CPE of the resource as listed in the issue by the Khulnasoft API. This is required for resources of type 'executable'. For packages and files, the next parameters can be specified instead.
 - `resource_format` (String) The format of the resource.
 - `resource_hash` (String) When the resource_type is 'file', the hash of the file is required
 - `resource_name` (String) When the resource_type is 'package', the name of the package is required.
 - `resource_path` (String) The path of the resource. This is required for resources of type 'file' and 'executable'.
 - `resource_version` (String) When the resource_type is 'package', the version of the package is required
+- `suppression_rule_id` (Number) Suppression rule ID
+- `suppression_rule_name` (String) Suppression rule name
+- `suppression_rule_scopes` (List of String)
 
 Read-Only:
 
@@ -87,5 +96,4 @@ Read-Only:
 - `expiration_configured_at` (String) The current dat and time when the expiration was set
 - `expiration_configured_by` (String) The user who set the expiration of the issue.
 - `permission` (String) The permissions of the user who acknowledged the issue.
-
 

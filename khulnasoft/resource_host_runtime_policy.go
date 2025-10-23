@@ -2798,6 +2798,15 @@ func flattenReadonlyFiles(files client.ReadonlyFiles) []map[string]interface{} {
 	}
 }
 
+// maskSensitiveField masks sensitive values for logging and state display
+func maskSensitiveField(value string) string {
+	if value == "" {
+		return ""
+	}
+	// Return a masked version of the sensitive field
+	return "********"
+}
+
 func flattenTripwire(tripwire client.Tripwire) []map[string]interface{} {
 	//if !tripwire.Enabled {
 	//	return []map[string]interface{}{}
@@ -2806,7 +2815,7 @@ func flattenTripwire(tripwire client.Tripwire) []map[string]interface{} {
 		{
 			"enabled":        tripwire.Enabled,
 			"user_id":        tripwire.UserID,
-			"user_password":  tripwire.UserPassword,
+			"user_password":  maskSensitiveField(tripwire.UserPassword),
 			"apply_on":       tripwire.ApplyOn,
 			"serverless_app": tripwire.ServerlessApp,
 		},

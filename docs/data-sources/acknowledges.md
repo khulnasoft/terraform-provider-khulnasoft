@@ -33,6 +33,7 @@ output "acknowledges" {
 
 Read-Only:
 
+- `ack_repo_id` (Number)
 - `author` (String)
 - `comment` (String)
 - `date` (String)
@@ -41,13 +42,18 @@ Read-Only:
 - `expiration_configured_by` (String)
 - `expiration_days` (Number)
 - `fix_version` (String)
+- `has_custom_severity` (Boolean)
+- `image` (String)
 - `image_name` (String)
 - `issue_name` (String)
 - `issue_type` (String)
 - `os` (String)
 - `os_version` (String)
 - `permission` (String)
+- `registry` (String)
 - `registry_name` (String)
+- `repository` (String)
+- `repository_name` (String)
 - `resource_cpe` (String)
 - `resource_format` (String)
 - `resource_hash` (String)
@@ -55,5 +61,7 @@ Read-Only:
 - `resource_path` (String)
 - `resource_type` (String)
 - `resource_version` (String)
-
+- `suppression_rule_id` (Number)
+- `suppression_rule_name` (String)
+- `suppression_rule_scopes` (List of String)
 

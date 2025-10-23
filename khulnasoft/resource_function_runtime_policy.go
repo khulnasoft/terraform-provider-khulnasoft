@@ -1486,7 +1486,7 @@ func resourceFunctionRuntimePolicyRead(ctx context.Context, d *schema.ResourceDa
 	//d.Set("block_malicious_executables_allowed_processes", crp.DriftPrevention.ExecLockdownWhiteList)
 	//d.Set("blocked_executables", crp.ExecutableBlacklist.Executables)
 	d.Set("honeypot_access_key", crp.Tripwire.UserID)
-	d.Set("honeypot_secret_key", crp.Tripwire.UserPassword)
+	d.Set("honeypot_secret_key", maskSensitiveField(crp.Tripwire.UserPassword))
 	d.Set("honeypot_apply_on", crp.Tripwire.ApplyOn)
 	d.Set("honeypot_serverless_app_name", crp.Tripwire.ServerlessApp)
 	//JSON

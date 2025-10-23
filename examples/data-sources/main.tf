@@ -121,6 +121,14 @@ output "function-assurance" {
   value = data.khulnasoft_function_assurance_policy.default-fap
 }
 
+data "khulnasoft_kubernetes_assurance_policy" "default-kap" {
+  name = "Default"
+}
+
+output "kubernetes-assurance" {
+  value = data.khulnasoft_kubernetes_assurance_policy.default-kap
+}
+
 data "khulnasoft_application_scope" "default" {
   name = "Global"
 }

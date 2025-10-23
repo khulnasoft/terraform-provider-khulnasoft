@@ -1,19 +1,23 @@
 package khulnasoft
 
 import (
+	"context"
 	"fmt"
-	"github.com/khulnasoft/terraform-provider-khulnasoft/client"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"strings"
+
+	"github.com/khulnasoft/terraform-provider-khulnasoft/client"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceFunctionAssurancePolicy() *schema.Resource {
 	return &schema.Resource{
-		Description: "Khulnasoft ensures function security for AWS Lambda, Microsoft Azure, and Google Cloud. This includes:\nScanning functions for vulnerabilities and sensitive data. AWS and Azure functions are also checked for excessive permissions.\nEvaluating function risks based on scan results, according to Function Assurance Policies.\nChecking function compliance with these policies.\nFor AWS and Azure, implementing security actions, such as blocking execution of risky functions or failing the CI/CD pipeline.\nProviding comprehensive audits of all security risks, viewable in Khulnasoft Server or a SIEM system.",
-		Create:      resourceFunctionAssurancePolicyCreate,
-		Read:        resourceFunctionAssurancePolicyRead,
-		Update:      resourceFunctionAssurancePolicyUpdate,
-		Delete:      resourceFunctionAssurancePolicyDelete,
+		Description:   "Khulnasoft ensures function security for AWS Lambda, Microsoft Azure, and Google Cloud. This includes:\nScanning functions for vulnerabilities and sensitive data. AWS and Azure functions are also checked for excessive permissions.\nEvaluating function risks based on scan results, according to Function Assurance Policies.\nChecking function compliance with these policies.\nFor AWS and Azure, implementing security actions, such as blocking execution of risky functions or failing the CI/CD pipeline.\nProviding comprehensive audits of all security risks, viewable in Khulnasoft Server or a SIEM system.",
+		CreateContext: resourceFunctionAssurancePolicyCreate,
+		ReadContext:   resourceFunctionAssurancePolicyRead,
+		UpdateContext: resourceFunctionAssurancePolicyUpdate,
+		DeleteContext: resourceFunctionAssurancePolicyDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -71,9 +75,10 @@ func resourceFunctionAssurancePolicy() *schema.Resource {
 				Optional:    true,
 			},
 			"maximum_score": {
-				Type:        schema.TypeFloat,
-				Description: "Value of allowed maximum score.",
-				Optional:    true,
+				Type:         schema.TypeFloat,
+				Description:  "Value of allowed maximum score.",
+				Optional:     true,
+				ValidateFunc: validation.FloatBetween(0, 10),
 			},
 			"control_exclude_no_fix": {
 				Type:     schema.TypeBool,
@@ -171,7 +176,7 @@ func resourceFunctionAssurancePolicy() *schema.Resource {
 			},
 			"whitelisted_licenses_enabled": {
 				Type:        schema.TypeBool,
-				Description: "Indicates if license blacklist is relevant.",
+				Description: "Indicates if license whitelist is relevant.",
 				Optional:    true,
 			},
 			"whitelisted_licenses": {
@@ -488,14 +493,24 @@ func resourceFunctionAssurancePolicy() *schema.Resource {
 				Optional: true,
 			},
 			"enforce_after_days": {
-				Type:     schema.TypeInt,
-				Optional: true,
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ValidateFunc: validation.IntBetween(0, 999),
 			},
 			"ignore_recently_published_vln": {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
 			"ignore_recently_published_vln_period": {
+				Type:     schema.TypeInt,
+				Computed: true,
+				Optional: true,
+			},
+			"ignore_recently_published_fix_vln": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"ignore_recently_published_fix_vln_period": {
 				Type:     schema.TypeInt,
 				Computed: true,
 				Optional: true,
@@ -629,7 +644,7 @@ func resourceFunctionAssurancePolicy() *schema.Resource {
 			},
 			"maximum_score_exclude_no_fix": {
 				Type:        schema.TypeBool,
-				Description: "",
+				Description: "Indicates that policy should ignore cases that do not have a known fix when evaluating maximum score.",
 				Optional:    true,
 			},
 			//JSON
@@ -641,13 +656,13 @@ func resourceFunctionAssurancePolicy() *schema.Resource {
 			}, // String
 			"custom_severity": {
 				Type:        schema.TypeString,
-				Description: "",
+				Description: "Custom severity level for vulnerability assessment.",
 				Optional:    true,
 				Computed:    true,
 			}, // string
 			"vulnerability_exploitability": {
 				Type:        schema.TypeBool,
-				Description: "",
+				Description: "Enable vulnerability exploitability assessment.",
 				Optional:    true,
 			}, //bool
 			"disallow_exploit_types": {
@@ -814,19 +829,11 @@ func resourceFunctionAssurancePolicy() *schema.Resource {
 					Type: schema.TypeInt,
 				},
 			}, // list
-			"aggregated_vulnerability": {
-				Type:        schema.TypeMap,
-				Description: "Aggregated vulnerability information.",
-				Optional:    true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-			},
 		},
 	}
 }
 
-func resourceFunctionAssurancePolicyCreate(d *schema.ResourceData, m interface{}) error {
+func resourceFunctionAssurancePolicyCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	ac := m.(*client.Client)
 	name := d.Get("name").(string)
 	assurance_type := "function"
@@ -835,14 +842,14 @@ func resourceFunctionAssurancePolicyCreate(d *schema.ResourceData, m interface{}
 	err := ac.CreateAssurancePolicy(iap, assurance_type)
 
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	d.SetId(name)
-	return resourceFunctionAssurancePolicyRead(d, m)
+	return resourceFunctionAssurancePolicyRead(ctx, d, m)
 
 }
 
-func resourceFunctionAssurancePolicyUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceFunctionAssurancePolicyUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	ac := m.(*client.Client)
 	assurance_type := "function"
 
@@ -937,24 +944,25 @@ func resourceFunctionAssurancePolicyUpdate(d *schema.ResourceData, m interface{}
 		"linux_cis_enabled",
 		"openshift_hardening_enabled",
 		"kubernetes_controls_avd_ids",
+		"vulnerability_score_range",
 	) {
 		iap := expandAssurancePolicy(d, assurance_type)
 		err := ac.UpdateAssurancePolicy(iap, assurance_type)
 		if err == nil {
-			err1 := resourceFunctionAssurancePolicyRead(d, m)
+			err1 := resourceFunctionAssurancePolicyRead(ctx, d, m)
 			if err1 == nil {
 				d.SetId(iap.Name)
 			} else {
 				return err1
 			}
 		} else {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 	return nil
 }
 
-func resourceFunctionAssurancePolicyRead(d *schema.ResourceData, m interface{}) error {
+func resourceFunctionAssurancePolicyRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	ac := m.(*client.Client)
 	assurance_type := "function"
 
@@ -965,7 +973,7 @@ func resourceFunctionAssurancePolicyRead(d *schema.ResourceData, m interface{}) 
 			d.SetId("")
 			return nil
 		}
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.Set("assurance_type", iap.AssuranceType)
@@ -1061,11 +1069,12 @@ func resourceFunctionAssurancePolicyRead(d *schema.ResourceData, m interface{}) 
 	d.Set("linux_cis_enabled", iap.LinuxCisEnabled)
 	d.Set("openshift_hardening_enabled", iap.OpenshiftHardeningEnabled)
 	d.Set("kubernetes_controls_avd_ids", iap.KubernetesControlsAvdIds)
+	d.Set("vulnerability_score_range", iap.VulnerabilityScoreRange)
 
 	return nil
 }
 
-func resourceFunctionAssurancePolicyDelete(d *schema.ResourceData, m interface{}) error {
+func resourceFunctionAssurancePolicyDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	ac := m.(*client.Client)
 	name := d.Get("name").(string)
 	assurance_type := "function"
@@ -1074,7 +1083,7 @@ func resourceFunctionAssurancePolicyDelete(d *schema.ResourceData, m interface{}
 	if err == nil {
 		d.SetId("")
 	} else {
-		return err
+		return diag.FromErr(err)
 	}
 	return nil
 }

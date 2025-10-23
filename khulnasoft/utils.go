@@ -6,7 +6,6 @@ import (
 	"github.com/khulnasoft/terraform-provider-khulnasoft/client"
 	"github.com/khulnasoft/terraform-provider-khulnasoft/consts"
 	os "os"
-	"strings"
 )
 
 func convertStringArr(ifaceArr []interface{}) []string {
@@ -233,10 +232,12 @@ func isSaasEnv() bool {
 	}
 }
 
-func isResourceExist(response string) bool {
-	if strings.Contains(response, "404") {
-		return false
-	} else {
-		return true
+// validateSaasResourceWarning creates a validation function that shows a warning when SaaS resources are used
+func validateSaasResourceWarning(resourceType, saasResourceType string) func(interface{}, string) ([]string, []error) {
+	return func(v interface{}, k string) ([]string, []error) {
+		if isSaasEnv() {
+			return nil, []error{fmt.Errorf("Resource '%s' is not supported in SaaS environments. Please use '%s' instead.", resourceType, saasResourceType)}
+		}
+		return nil, nil
 	}
 }

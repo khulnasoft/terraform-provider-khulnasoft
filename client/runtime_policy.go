@@ -7,6 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"io"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -295,6 +296,79 @@ type ReverseShell struct {
 
 // JSON
 
+// sanitizePayloadForLogging creates a copy of JSON payload with sensitive fields masked
+func sanitizePayloadForLogging(payload []byte) string {
+	// Parse the JSON payload
+	var data map[string]interface{}
+	if err := json.Unmarshal(payload, &data); err != nil {
+		// If we can't parse it, return a generic message
+		return "[invalid JSON payload]"
+	}
+
+	// Create a copy of the data to modify
+	sanitizedData := make(map[string]interface{})
+	for k, v := range data {
+		sanitizedData[k] = sanitizeValue(v)
+	}
+
+	// Marshal back to JSON
+	sanitizedJSON, err := json.Marshal(sanitizedData)
+	if err != nil {
+		return "[error sanitizing payload]"
+	}
+
+	return string(sanitizedJSON)
+}
+
+// sanitizeValue recursively sanitizes values, masking sensitive fields
+func sanitizeValue(value interface{}) interface{} {
+	switch v := value.(type) {
+	case map[string]interface{}:
+		// Handle nested objects (like Tripwire struct)
+		sanitized := make(map[string]interface{})
+		for key, val := range v {
+			if isSensitiveField(key) {
+				sanitized[key] = "********"
+			} else {
+				sanitized[key] = sanitizeValue(val)
+			}
+		}
+		return sanitized
+	case []interface{}:
+		// Handle arrays
+		sanitized := make([]interface{}, len(v))
+		for i, item := range v {
+			sanitized[i] = sanitizeValue(item)
+		}
+		return sanitized
+	default:
+		// Handle primitive values
+		return v
+	}
+}
+
+// isSensitiveField checks if a field name indicates sensitive information
+func isSensitiveField(fieldName string) bool {
+	sensitiveFields := []string{
+		"user_password",
+		"password",
+		"secret",
+		"key",
+		"token",
+		"auth",
+		"credential",
+		"private",
+	}
+
+	fieldNameLower := strings.ToLower(fieldName)
+	for _, sensitive := range sensitiveFields {
+		if strings.Contains(fieldNameLower, sensitive) {
+			return true
+		}
+	}
+	return false
+}
+
 // CreateRuntimePolicy creates an Khulnasoft RuntimePolicy
 func (cli *Client) CreateRuntimePolicy(runtimePolicy *RuntimePolicy) error {
 	payload, err := json.Marshal(runtimePolicy)
@@ -308,7 +382,7 @@ func (cli *Client) CreateRuntimePolicy(runtimePolicy *RuntimePolicy) error {
 	if err != nil {
 		return err
 	}
-	log.Println(string(payload))
+	log.Printf("[DEBUG] Creating runtime policy with payload: %s", sanitizePayloadForLogging(payload))
 	resp, body, errs := request.Clone().Set("Authorization", "Bearer "+cli.token).Post(cli.url + apiPath).Send(string(payload)).End()
 	if errs != nil {
 		return errors.Wrap(getMergedError(errs), "failed creating runtime policy.")
@@ -372,6 +446,7 @@ func (cli *Client) UpdateRuntimePolicy(runtimePolicy *RuntimePolicy) error {
 	if err != nil {
 		return err
 	}
+	log.Printf("[DEBUG] Updating runtime policy '%s' with payload: %s", runtimePolicy.Name, sanitizePayloadForLogging(payload))
 	resp, _, errs := request.Clone().Set("Authorization", "Bearer "+cli.token).Put(cli.url + apiPath).Send(string(payload)).End()
 	if errs != nil {
 		return errors.Wrap(getMergedError(errs), "failed modifying runtime policy")
