@@ -3,7 +3,7 @@
 
 # Project configuration
 BINARY_NAME := terraform-provider-khulnasoft
-VERSION ?= 0.8.30
+VERSION ?= 0.9.0
 NAMESPACE := khulnasoft
 HOSTNAME := reegregistry.terraform.io
 OS_ARCH := $(shell go env GOOS)_$(shell go env GOARCH)
