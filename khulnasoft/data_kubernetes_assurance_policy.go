@@ -1,13 +1,16 @@
 package khulnasoft
 
 import (
+	"context"
+
 	"github.com/khulnasoft/terraform-provider-khulnasoft/client"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataKubernetesAssurancePolicy() *schema.Resource {
 	return &schema.Resource{
-		Read: dataKubernetesAssurancePolicyRead,
+		ReadContext: dataKubernetesAssurancePolicyRead,
 		Schema: map[string]*schema.Schema{
 			/*
 				"assurance_type": {
@@ -489,6 +492,14 @@ func dataKubernetesAssurancePolicy() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+			"ignore_recently_published_fix_vln": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"ignore_recently_published_fix_vln_period": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
 			"ignore_risk_resources_enabled": {
 				Type:        schema.TypeBool,
 				Description: "Indicates if risk resources are ignored.",
@@ -622,7 +633,7 @@ func dataKubernetesAssurancePolicy() *schema.Resource {
 	}
 }
 
-func dataKubernetesAssurancePolicyRead(d *schema.ResourceData, m interface{}) error {
+func dataKubernetesAssurancePolicyRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	ac := m.(*client.Client)
 	name := d.Get("name").(string)
 	assurance_type := "kubernetes"
@@ -655,7 +666,7 @@ func dataKubernetesAssurancePolicyRead(d *schema.ResourceData, m interface{}) er
 		d.Set("disallow_malware", iap.DisallowMalware)
 		d.Set("monitored_malware_paths", iap.MonitoredMalwarePaths)
 		d.Set("exceptional_monitored_malware_paths", iap.ExceptionalMonitoredMalwarePaths)
-		d.Set("kubernetes_controls_names", iap.KubenetesControlsNames)
+		d.Set("kubernetes_controls_names", iap.KubernetesControlsNames)
 		d.Set("blacklisted_licenses_enabled", iap.BlacklistedLicensesEnabled)
 		d.Set("blacklisted_licenses", iap.BlacklistedLicenses)
 		d.Set("whitelisted_licenses_enabled", iap.WhitelistedLicensesEnabled)
@@ -706,7 +717,7 @@ func dataKubernetesAssurancePolicyRead(d *schema.ResourceData, m interface{}) er
 		d.Set("maximum_score_exclude_no_fix", iap.MaximumScoreExcludeNoFix)
 		d.SetId(name)
 	} else {
-		return err
+		return diag.FromErr(err)
 	}
 	return nil
 }

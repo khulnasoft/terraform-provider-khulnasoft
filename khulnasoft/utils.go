@@ -6,7 +6,6 @@ import (
 	"github.com/khulnasoft/terraform-provider-khulnasoft/client"
 	"github.com/khulnasoft/terraform-provider-khulnasoft/consts"
 	os "os"
-	"strings"
 )
 
 func convertStringArr(ifaceArr []interface{}) []string {
@@ -231,15 +230,6 @@ func isSaasEnv() bool {
 	default:
 		return false
 	}
-}
-
-// maskSensitiveField masks sensitive values for logging and state display
-func maskSensitiveField(value string) string {
-	if value == "" {
-		return ""
-	}
-	// Return a masked version of the sensitive field
-	return "********"
 }
 
 // validateSaasResourceWarning creates a validation function that shows a warning when SaaS resources are used
