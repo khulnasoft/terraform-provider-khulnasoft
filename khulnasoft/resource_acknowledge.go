@@ -1,23 +1,25 @@
 package khulnasoft
 
 import (
+	"context"
 	"fmt"
-	"github.com/khulnasoft/terraform-provider-khulnasoft/client"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"strings"
 	"time"
+
+	"github.com/khulnasoft/terraform-provider-khulnasoft/client"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceAcknowledge() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceAcknowledgeCreate,
-		Update: resourceAcknowledgeUpdate,
-		Read:   resourceAcknowledgeRead,
-		Delete: resourceAcknowledgeDelete,
-		// todo: bring it back when will have Acknowledges IDs
-		//Importer: &schema.ResourceImporter{
-		//	StateContext: schema.ImportStatePassthroughContext,
-		//},
+		CreateContext: resourceAcknowledgeCreate,
+		UpdateContext: resourceAcknowledgeUpdate,
+		ReadContext:   resourceAcknowledgeRead,
+		DeleteContext: resourceAcknowledgeDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 		Schema: map[string]*schema.Schema{
 			"comment": {
 				Type:        schema.TypeString,
@@ -72,7 +74,7 @@ func resourceAcknowledge() *schema.Resource {
 						},
 						"resource_cpe": {
 							Type:        schema.TypeString,
-							Description: "The CPE of the resource as listed in the issue by the Khulnasoft API. This is required for resources of type 'executable'. For packages and files, the next parameters can be specified instead.",
+							Description: "The CPE of the resource as listed in the issue by the Aqua API. This is required for resources of type 'executable'. For packages and files, the next parameters can be specified instead.",
 							Optional:    true,
 						},
 						"resource_path": {
@@ -135,6 +137,53 @@ func resourceAcknowledge() *schema.Resource {
 							Description: "",
 							Optional:    true,
 						},
+						"repository_name": {
+							Type:        schema.TypeString,
+							Description: "The name of the repository in whose context the issue was acknowledged (if not for all images)",
+							Optional:    true,
+						},
+						"ack_repo_id": {
+							Type:        schema.TypeInt,
+							Description: "Unique ID generated when a security issue on a resource is suppressed. It is used to remove the suppression after the expiration period.",
+							Optional:    true,
+						},
+						"suppression_rule_id": {
+							Type:        schema.TypeInt,
+							Description: "Suppression rule ID",
+							Optional:    true,
+						},
+						"suppression_rule_name": {
+							Type:        schema.TypeString,
+							Description: "Suppression rule name",
+							Optional:    true,
+						},
+						"suppression_rule_scopes": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+						"has_custom_severity": {
+							Type:        schema.TypeBool,
+							Description: "Indicates whether custom severity is assigned to the suppressed vulnerability",
+							Optional:    true,
+						},
+						"registry": {
+							Type:        schema.TypeString,
+							Description: "If the issue was acknowledged in the context of a specific image or repository, the name of the registry where they are located",
+							Optional:    true,
+						},
+						"repository": {
+							Type:        schema.TypeString,
+							Description: "The name of the repository in whose context the issue was acknowledged (if not for all images)",
+							Optional:    true,
+						},
+						"image": {
+							Type:        schema.TypeString,
+							Description: "The name of the image in whose context the issue was acknowledged (if not for all images)",
+							Optional:    true,
+						},
 					},
 				},
 			},
@@ -142,7 +191,7 @@ func resourceAcknowledge() *schema.Resource {
 	}
 }
 
-func resourceAcknowledgeCreate(d *schema.ResourceData, m interface{}) error {
+func resourceAcknowledgeCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	ac := m.(*client.Client)
 	acknowledgePost := client.AcknowledgePost{}
 	eIssues := client.AcknowledgePost{}.Issues
@@ -160,19 +209,14 @@ func resourceAcknowledgeCreate(d *schema.ResourceData, m interface{}) error {
 
 	err := ac.AcknowledgeCreate(acknowledgePost)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	d.SetId(id)
 
-	err = resourceAcknowledgeRead(d, m)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return resourceAcknowledgeRead(ctx, d, m)
 }
 
-func resourceAcknowledgeUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceAcknowledgeUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	ac := m.(*client.Client)
 	var err error
 	var comment string
@@ -188,7 +232,7 @@ func resourceAcknowledgeUpdate(d *schema.ResourceData, m interface{}) error {
 			err = ac.AcknowledgeDelete(client.AcknowledgePost{Issues: expendedIssuesToDelete})
 
 			if err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 		}
 
@@ -199,19 +243,14 @@ func resourceAcknowledgeUpdate(d *schema.ResourceData, m interface{}) error {
 				Issues:  expendIssuesToCreate,
 			})
 			if err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 		}
-
-		err = resourceAcknowledgeRead(d, m)
-		if err != nil {
-			return err
-		}
 	}
-	return nil
+	return resourceAcknowledgeRead(ctx, d, m)
 }
 
-func resourceAcknowledgeRead(d *schema.ResourceData, m interface{}) error {
+func resourceAcknowledgeRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	ac := m.(*client.Client)
 	acknowledgePost := client.AcknowledgePost{}
 	//var mappedResult map[string]interface{}
@@ -233,7 +272,7 @@ func resourceAcknowledgeRead(d *schema.ResourceData, m interface{}) error {
 			d.SetId("")
 			return nil
 		}
-		return err
+		return diag.FromErr(err)
 	}
 
 	updateIssuesFromReadList(&acknowledgePost, currentAcknowledges)
@@ -246,7 +285,7 @@ func resourceAcknowledgeRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceAcknowledgeDelete(d *schema.ResourceData, m interface{}) error {
+func resourceAcknowledgeDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	ac := m.(*client.Client)
 	acknowledgePost := client.AcknowledgePost{}
 
@@ -260,7 +299,7 @@ func resourceAcknowledgeDelete(d *schema.ResourceData, m interface{}) error {
 	if err == nil {
 		d.SetId("")
 	} else {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -342,6 +381,48 @@ func expandIssues(issues interface{}) ([]client.Acknowledge, string) {
 		if attr, ok := i["author"]; ok && attr != "" {
 			acknowledge.Author = attr.(string)
 		}
+
+		if attr, ok := i["repository_name"]; ok && attr != "" {
+			acknowledge.RepositoryName = attr.(string)
+		}
+
+		if attr, ok := i["ack_repo_id"]; ok && attr != nil {
+			acknowledge.AckRepoId = attr.(int)
+		}
+
+		if attr, ok := i["suppression_rule_id"]; ok && attr != nil {
+			acknowledge.SuppressionRuleId = attr.(int)
+		}
+
+		if attr, ok := i["suppression_rule_name"]; ok && attr != "" {
+			acknowledge.SuppressionRuleName = attr.(string)
+		}
+
+		if attr, ok := i["suppression_rule_scopes"]; ok && attr != nil {
+			suppressionRuleScopes := attr.([]interface{})
+			suppressionRuleScopesString := make([]string, len(suppressionRuleScopes))
+			for i, v := range suppressionRuleScopes {
+				suppressionRuleScopesString[i] = v.(string)
+			}
+			acknowledge.SuppressionRuleScopes = suppressionRuleScopesString
+		}
+
+		if attr, ok := i["has_custom_severity"]; ok && attr != nil {
+			acknowledge.HasCustomSeverity = attr.(bool)
+		}
+
+		if attr, ok := i["registry"]; ok && attr != "" {
+			acknowledge.Registry = attr.(string)
+		}
+
+		if attr, ok := i["repository"]; ok && attr != "" {
+			acknowledge.Repository = attr.(string)
+		}
+
+		if attr, ok := i["image"]; ok && attr != "" {
+			acknowledge.Image = attr.(string)
+		}
+
 		acknowledgePost = append(acknowledgePost, acknowledge)
 		id = id + acknowledge.IssueName
 	}
@@ -383,6 +464,15 @@ func flattenIssue(ack client.Acknowledge) map[string]interface{} {
 		"os":                       ack.Os,
 		"os_version":               ack.OsVersion,
 		"docker_id":                ack.DockerId,
+		"repository_name":          ack.RepositoryName,
+		"ack_repo_id":              ack.AckRepoId,
+		"suppression_rule_id":      ack.SuppressionRuleId,
+		"suppression_rule_name":    ack.SuppressionRuleName,
+		"suppression_rule_scopes":  ack.SuppressionRuleScopes,
+		"has_custom_severity":      ack.HasCustomSeverity,
+		"registry":                 ack.Registry,
+		"repository":               ack.Repository,
+		"image":                    ack.Image,
 	}
 }
 
@@ -402,7 +492,7 @@ func updateIssuesFromReadList(issues *client.AcknowledgePost, readIssues *client
 			ack.Author = val.(client.Acknowledge).Author
 			issues.Issues[i] = ack
 		} else {
-			return fmt.Errorf(fmt.Sprintf("issue: %s wasn't crerated and is missing from active acknowledgments", ack.IssueName))
+			return fmt.Errorf("issue: %s wasn't crerated and is missing from active acknowledgments", ack.IssueName)
 		}
 	}
 	return nil

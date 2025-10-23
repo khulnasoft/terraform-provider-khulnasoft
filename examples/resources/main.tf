@@ -322,8 +322,9 @@ resource "khulnasoft_permissions_sets" "my_terraform_perm_set" {
   ]
 }
 resource "khulnasoft_host_assurance_policy" "newhap" {
-  name        = "testprovider"
-  description = "Created using Terraform"
+  name           = "testprovider"
+  assurance_type = "host"
+  description    = "Created using Terraform"
   application_scopes = [
     "Global"
   ]
@@ -339,8 +340,9 @@ resource "khulnasoft_host_assurance_policy" "newhap" {
 }
 
 resource "khulnasoft_function_assurance_policy" "newfap" {
-  name        = "testprovider"
-  description = "Created using Terraform"
+  name           = "testprovider"
+  assurance_type = "function"
+  description    = "Created using Terraform"
   application_scopes = [
     "Global"
   ]
