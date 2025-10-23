@@ -63,6 +63,20 @@ func Provider(v string) *schema.Provider {
 				DefaultFunc: schema.EnvDefaultFunc("KHULNASOFT_CONFIG", "~/.khulnasoft/tf.config"),
 				Description: "This is the file path for Khulnasoft provider configuration. The default configuration path is `~/.khulnasoft/tf.config`. Can alternatively be sourced from the `KHULNASOFT_CONFIG` environment variable.",
 			},
+			"khulnasoft_api_key_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Sensitive:   true,
+				DefaultFunc: schema.EnvDefaultFunc("KHULNASOFT_API_KEY_ID", nil),
+				Description: "This is the API key ID that should be used to make the connection. Can alternatively be sourced from the `KHULNASOFT_API_KEY_ID` environment variable.",
+			},
+			"khulnasoft_api_secret": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Sensitive:   true,
+				DefaultFunc: schema.EnvDefaultFunc("KHULNASOFT_API_SECRET", nil),
+				Description: "This is the API secret that should be used to make the connection. Can alternatively be sourced from the `KHULNASOFT_API_SECRET` environment variable.",
+			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"khulnasoft_user":                        resourceUser(),
@@ -170,25 +184,57 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	khulnasoftURL := d.Get("khulnasoft_url").(string)
 	verifyTLS := d.Get("verify_tls").(bool)
 	caCertPath := d.Get("ca_certificate_path").(string)
+	apiKeyID := d.Get("khulnasoft_api_key_id").(string)
+	apiSecret := d.Get("khulnasoft_api_secret").(string)
 
-	if username == "" && password == "" && khulnasoftURL == "" {
+	// Check if using API key authentication
+	if apiKeyID != "" && apiSecret != "" {
+		// Validate that username/password are not also provided
+		if username != "" || password != "" {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Cannot use both username/password and API key authentication",
+				Detail:   "Please provide either username/password OR khulnasoft_api_key_id/khulnasoft_api_secret, not both.",
+			})
+			return nil, diags
+		}
+	} else if username == "" && password == "" && khulnasoftURL == "" && apiKeyID == "" && apiSecret == "" {
+		// Try to load from config file if all parameters are empty
 		username, password, khulnasoftURL, err = getProviderConfigurationFromFile(d)
 		if err != nil {
 			return nil, diag.FromErr(err)
 		}
 	}
 
-	if username == "" {
+	// Validate required parameters for username/password auth
+	if (username != "" || password != "") && khulnasoftURL == "" {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
-			Summary:  "Initializing provider, username parameter is missing.",
+			Summary:  "Initializing provider, khulnasoft_url parameter is missing when using username/password authentication.",
 		})
 	}
 
-	if password == "" {
+	// Validate required parameters for API key auth
+	if (apiKeyID != "" || apiSecret != "") && khulnasoftURL == "" {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
-			Summary:  "Initializing provider, password parameter is missing.",
+			Summary:  "Initializing provider, khulnasoft_url parameter is missing when using API key authentication.",
+		})
+	}
+
+	// Ensure both API key fields are provided together
+	if (apiKeyID != "" && apiSecret == "") || (apiKeyID == "" && apiSecret != "") {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Both khulnasoft_api_key_id and khulnasoft_api_secret must be provided together.",
+		})
+	}
+
+	// Validate that we have some form of authentication
+	if username == "" && password == "" && apiKeyID == "" && apiSecret == "" {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "No authentication method provided. Please provide either username/password or khulnasoft_api_key_id/khulnasoft_api_secret.",
 		})
 	}
 
@@ -217,10 +263,18 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 		return nil, diags
 	}
 
-	khulnasoftClient := client.NewClient(khulnasoftURL, username, password, verifyTLS, caCertByte)
+	var khulnasoftClient *client.Client
+
+	// Create client based on authentication method
+	if apiKeyID != "" && apiSecret != "" {
+		// Use API key authentication
+		khulnasoftClient = client.NewClientWithAPIKey(khulnasoftURL, apiKeyID, apiSecret, verifyTLS, caCertByte)
+	} else {
+		// Use username/password authentication
+		khulnasoftClient = client.NewClientWithTokenAuth(khulnasoftURL, username, password, verifyTLS, caCertByte)
+	}
 
 	token, tokenPresent := os.LookupEnv("TESTING_AUTH_TOKEN")
-
 	url, urlPresent := os.LookupEnv("TESTING_URL")
 
 	if !tokenPresent || !urlPresent {
@@ -238,7 +292,6 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	} else {
 		khulnasoftClient.SetAuthToken(token)
 		khulnasoftClient.SetUrl(url)
-
 	}
 
 	return khulnasoftClient, diags

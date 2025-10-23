@@ -18,6 +18,18 @@ website/node_modules
 ./*.tfstate
 .terraform/
 *.log
+
+# Development files
+.env.dev
+coverage.out
+coverage.html
+*.prof
+*.test
+backup-*.tar.gz
+
+# Build artifacts
+terraform-provider-khulnasoft
+.terraform.lock.hcl
 *.bak
 *~
 .*.swp

@@ -2,7 +2,7 @@
 # This ensures docker volumes are mounted from within provider directory instead.
 PROVIDER_DIR := $(abspath $(lastword $(dir $(MAKEFILE_LIST))))
 TEST         := "$(PROVIDER_DIR)/khulnasoft"
-HOSTNAME	 := github.com
+HOSTNAME	 := reegregistry.terraform.io
 NAMESPACE	 := khulnasoft
 NAME 		 := khulnasoft
 BINARY		 := terraform-provider-${NAME}
